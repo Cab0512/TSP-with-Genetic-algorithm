@@ -15,7 +15,7 @@ Graph::Graph(int V, int initial_vertex, bool random_graph) // constructor
 	
 	this->V = V; // numero de vertices
 	this->initial_vertex = initial_vertex; // vertice inicial
-	this->total_edges = 0; // total de  edges (o links)  0
+	this->total_edges = 0; // total de  uniones, 0 inicialmente
 	
 	if(random_graph)
 		generatesGraph();
@@ -39,7 +39,7 @@ void Graph::generatesGraph()
 	for(i = 0; i <= V; i++)
 	{
 		weight = rand() % (10*V) + 1; // random weight (distancia) en [1,10*V]
-    //se pude cambiar para otros valores deseados, como para enteros u otros ejemplos 
+    //se pude cambiar para otros valores deseados, como para distancias mas grandes o mas pequeñas
 		
 		if(i + 1 < V)
 			addEdge(vec[i], vec[i + 1], weight);
@@ -51,15 +51,15 @@ void Graph::generatesGraph()
 		}
 	}
 	
-	int limit_edges = V * (V - 1); // calculamis el limite de edges
+	int limit_edges = V * (V - 1); // calculamis el limite de uniones
 	int size_edges = rand() % (2 * limit_edges) + limit_edges;
 	
-	// agregamos edges aleatorios
+	// agregamos uniones aleatorias
 	for(int i = 0; i < size_edges; i++)
 	{
-		int src = rand() % V; // random source
-		int dest = rand() % V; // random destination
-		weight = rand() % V + 1; // random weight in range [1,V]
+		int src = rand() % V; // random inicio
+		int dest = rand() % V; // random destino
+		weight = rand() % V + 1; // random distancia en  [1,10*V]
 		if(src != dest)
 		{
 			addEdge(vec[src], vec[dest], weight);
@@ -77,9 +77,9 @@ void Graph::showInfoGraph()
 }
 
 
-void Graph::addEdge(int src, int dest, int weight) // agregar un nuevo edge 
+void Graph::addEdge(int src, int dest, int weight) // agregar una nueva union
 {
-	map_edges[make_pair(src, dest)] = weight; // agrega edges en el mapa
+	map_edges[make_pair(src, dest)] = weight; // agregamos la union en el mapita
 }
 
 
