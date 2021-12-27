@@ -487,7 +487,7 @@ del proceso de reproducción */
     int dif_poblacion = poblacion_actual - tam_poblacion;
 			
       while(dif_poblacion>0){
-				if(poblacion_actual > tam_poblacion)
+				if(dif_poblacion >= 1)
 				{
 					
 					poblacion.pop_back(); //Intente con pop y no me funciono asi que use popback

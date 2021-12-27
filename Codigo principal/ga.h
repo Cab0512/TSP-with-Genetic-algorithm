@@ -62,24 +62,25 @@ class Genetic
 {
 private:
 	Graph* graph; // el grafo
-	std::vector< my_pair > population; // cada elemento es un par: vector y costo total
-	int size_population; // tamaño de poblacion
-	int real_size_population; // valor real poblacion (eliminando las anomalias)
-	int generations; // cantidad de generaciones
-	int mutation_rate; // radio de mutacion, probabilidad de mutacion
-  int children;  //childrens
-	bool show_population; // bandera para mostrar poblacion 
+	std::vector< my_pair > poblacion; // cada elemento es un par: vector y costo total
+	int tam_poblacion; // tamaño de poblacion
+	int poblacion_actual; // valor real poblacion (eliminando las anomalias)
+	int generaciones; // cantidad de generaciones
+	int prob_mutacion; // radio de mutacion, probabilidad de mutacion
+  int numcross;  //n°cross
+	bool shows; // bandera para mostrar la distancia total por iteracion 
+  bool show; //mostrar poblacion inicial y final
 private:
-	void initialPopulation(); // genera la poblacion inicial 
+	void poblacioninicial(); // genera la poblacion inicial 
 public:
-	Genetic(Graph* graph, int amount_population, int generations, int mutation_rate,int children, bool show_population = true); // constructor
-	int isValidSolution(std::vector<int>& solution); // chequea si la solucion es valida 
-	void showPopulation(); // muestra la poblacion
+	Genetic(Graph* graph, int tam_poblacion, int generaciones, int prob_mutacion, int numcross, bool show = true,bool shows=true); // constructor
+	int Solval(std::vector<int>& solution); // chequea si la solucion es valida 
+	void showP(); // muestra la poblacion
 	void crossOver(std::vector<int>& parent1, std::vector<int>& parent2); // hace el crossOver o cruza ademas de la mutación
-	void insertBinarySearch(std::vector<int>& child, int total_cost); // usa busqueda binary para insertar
+	void Binary(std::vector<int>& child, int total_cost); // usa busqueda binary para insertar
 	void run(); // corre el algoritmo genetico 
-	int getCostBestSolution(); // retorna la mejor solucion 
-	bool existsChromosome(const std::vector<int> & v); // chequea si existe el cromosoma 
+	int BestSol(); // retorna la mejor solucion 
+	bool Cromosoma(const std::vector<int> & v); // chequea si existe el cromosoma 
 };
 
 #endif
