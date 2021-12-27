@@ -12,7 +12,8 @@ int main()
 	// parameters: grafo, tamaño generacion, cantidad de generaciones , radio de mutacion y hijos
 	// parametro opcional: true para ver generacion 
 	//si el algoritmo se demora mucho bajar la cantidad de hijos. 
-  Genetic genetic(g4, 100, 1000, 10, 10, false);
+  Genetic genetic(g4, 100, 1000, 10, 10, true,false);
+ //True si quiere ver la ejecucion del algoritmo y la poblacion final
 
 	const clock_t begin_time = clock(); // medir el tiempo
 	genetic.run(); // ejecutar el algoritmo

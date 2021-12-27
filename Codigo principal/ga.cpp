@@ -107,40 +107,41 @@ void Graph::showG() // muestra todas las uniones del grafo
 }
 
 // construye el algoritmo genetico
-Genetic::Genetic(Graph* graph, int size_population, int generations, int mutation_rate, int children, bool show_population)
+Genetic::Genetic(Graph* graph, int tam_poblacion, int generaciones, int prob_mutacion, int numcross, bool show,bool shows)
 {
-	if(size_population < 1) //ver si el tamaño de la  generacion es mayor que 1 
+	if(tam_poblacion < 1) //ver si el tamaño de la  generacion es mayor que 1 
 	{
 		cout << "Error: poblacion < 1\n";
 		exit(1);
 	}
-	else if(mutation_rate < 0 || mutation_rate > 100) // chequeamos que el radio de mutaciones no sea estupido 
+	else if(prob_mutacion < 0 || prob_mutacion > 100) // chequeamos que el radio de mutaciones no sea estupido 
 	{
 		cout << "Error:  radio de mutacion debe estar en [0,100] \n";
 		exit(1);
 	}
 	this->graph = graph;
-	this->size_population = size_population;
-	this->real_size_population = 0;
-	this->generations = generations;
-	this->mutation_rate = mutation_rate;
-	this->show_population = show_population;
-  this->children=children;
+	this->tam_poblacion = tam_poblacion;
+	this->poblacion_actual = 0;
+	this->generaciones = generaciones;
+	this->prob_mutacion = prob_mutacion;
+	this->show = show;
+  this->numcross=numcross;
+  this->shows=shows;
 }
 
 
 
 // chequeamos si es una solucion valida (que los vertices esten unidos de lo contrario devuelve -1
-int Genetic::isValidSolution(vector<int>& solution)
+int Genetic::Solval(vector<int>& solucion)
 {
 	int total_cost = 0;
-	set<int> set_solution;
+	set<int> set_solucion;
 	
 	//chequeamos si no contiene elementos repetidos (por si acaso)
 	for(int i = 0; i < graph->V; i++)
-		set_solution.insert(solution[i]);
+		set_solucion.insert(solucion[i]);
 	
-	if(set_solution.size() != (unsigned)graph->V)
+	if(set_solucion.size() != (unsigned)graph->V)
 		return -1;
 
 	// chequeo si las conecciones estan hechas
@@ -148,7 +149,7 @@ int Genetic::isValidSolution(vector<int>& solution)
 	{
 		if(i + 1 <  graph->V)
 		{
-			int cost = graph->existsunion(solution[i], solution[i+1]);
+			int cost = graph->existsunion(solucion[i], solucion[i+1]);
 			
 			// chequeamos si hay solucion
 			if(cost == -1)
@@ -158,7 +159,7 @@ int Genetic::isValidSolution(vector<int>& solution)
 		}
 		else
 		{
-			int cost = graph->existsunion(solution[i], solution[0]);
+			int cost = graph->existsunion(solucion[i], solucion[0]);
 			
 			// chequeamos si existe conección
 			if(cost == -1)
@@ -172,10 +173,10 @@ int Genetic::isValidSolution(vector<int>& solution)
 }
 
 
-bool Genetic::existsChromosome(const vector<int> & v)
+bool Genetic::Cromosoma(const vector<int> & v)
 {
 	// chequeamos si existe una poblacion
-	for(vector<pair<vector<int>, int> >::iterator it=population.begin(); it!=population.end(); ++it)
+	for(vector<pair<vector<int>, int> >::iterator it=poblacion.begin(); it!=poblacion.end(); ++it)
 	{
 		const vector<int>& vec = (*it).first; // obtenemos el vector
 		if(equal(v.begin(), v.end(), vec.begin())) // comparamos el vector
@@ -185,7 +186,7 @@ bool Genetic::existsChromosome(const vector<int> & v)
 }
 
 
-void Genetic::initialPopulation() // generamos la poblacion inicial
+void Genetic::poblacioninicial() // generamos la poblacion inicial
 {
 	vector<int> parent;
 	
@@ -199,44 +200,44 @@ void Genetic::initialPopulation() // generamos la poblacion inicial
 			parent.push_back(i);
 	}
 		
-	int total_cost = isValidSolution(parent);
+	int total_cost = Solval(parent);
 	
 	if(total_cost != -1) // chequeamos si el padre es valido
 	{
-		population.push_back(make_pair(parent, total_cost)); // insertamos la poblacion 
-		real_size_population++; // incrementamos el tamaño de la poblacion
+		poblacion.push_back(make_pair(parent, total_cost)); // insertamos la poblacion 
+		poblacion_actual++; // incrementamos el tamaño de la poblacion
 	}
 	
 	// cramos permutaciones alaeatirio "generation" veces
-	for(int i = 0; i < generations; i++)
+	for(int i = 0; i < generaciones; i++) //Porque no poner un while? pq no sabemos si hay suficientes soluciones factibles como para rellenar las soluciones iniciales
 	{
 		// permutacion aleatorio, funcion shuffle es de ayuda
 		random_shuffle(parent.begin() + 1, parent.begin() + (rand() % (graph->V - 1) + 1));
 		
-		int total_cost = isValidSolution(parent); // chequeamos si la solucion es valida
+		int total_cost = Solval(parent); // chequeamos si la solucion es valida
 		
 		// chequeamos si la permutacion es valida y si la solucion no esta
-		if(total_cost != -1 && !existsChromosome(parent))
+		if(total_cost != -1 && !Cromosoma(parent))
 		{
-			population.push_back(make_pair(parent, total_cost)); // agrega en la solucion iniciaul
-			real_size_population++; // incrementamos el real size population
+		poblacion.push_back(make_pair(parent, total_cost)); // agrega en la solucion iniciaul
+			poblacion_actual++; // incrementamos el real size population
 		}
-		if(real_size_population == size_population) // chequamos el tamaño de la poblacion, si tenemos los necesarios breakeamos
+		if(poblacion_actual == tam_poblacion) // chequamos el tamaño de la poblacion, si tenemos los necesarios breakeamos
 			break;
 	}
 	
 	//chequea si la poblacion inicial es  0
-	if(real_size_population == 0)
+	if(poblacion_actual == 0)
 		cout << "\nPoblacion inicial vacia :( intente  correr denuevo el algoritmo ...";
 	else
-		sort(population.begin(), population.end(), sort_pred()); // ordena la poblacion
+		sort(poblacion.begin(), poblacion.end(), sort_pred()); // ordena la poblacion
 }
 
 
-void Genetic::showPopulation()
+void Genetic::showP()
 {
 	cout << "\nMuestra las soluciones...\n\n";
-	for(vector<pair<vector<int>, int> >::iterator it=population.begin(); it!=population.end(); ++it)
+	for(vector<pair<vector<int>, int> >::iterator it=poblacion.begin(); it!=poblacion.end(); ++it)
 	{
 		const vector<int>& vec = (*it).first; // obtenemos el vector
 		
@@ -245,31 +246,31 @@ void Genetic::showPopulation()
 		cout << graph->vertice_inicial;
 		cout << "\n Costo: " << (*it).second << "\n\n";
 	}
-	cout << "\nTamaño Poblacion: " << real_size_population << endl;
+	cout << "\nTamaño Poblacion: " << poblacion_actual << endl;
 }
 
 
 // Insetamos el vector usando binary search
-void Genetic::insertBinarySearch(vector<int>& child, int total_cost)
+void Genetic::Binary(vector<int>& child, int total_cost)
 {
 	int imin = 0;
-	int imax = real_size_population - 1;
+	int imax = poblacion_actual - 1;
 	
 	while(imax >= imin)
 	{
 		int imid = imin + (imax - imin) / 2;
 		
-		if(total_cost == population[imid].second)
+		if(total_cost == poblacion[imid].second)
 		{
-			population.insert(population.begin() + imid, make_pair(child, total_cost));
+			poblacion.insert(poblacion.begin() + imid, make_pair(child, total_cost));
 			return;
 		}
-		else if(total_cost > population[imid].second)
+		else if(total_cost > poblacion[imid].second)
 			imin = imid + 1;
 		else
 			imax = imid - 1;
 	}
-	population.insert(population.begin() + imin, make_pair(child, total_cost));
+	poblacion.insert(poblacion.begin() + imin, make_pair(child, total_cost));
 }
 
 
@@ -384,7 +385,7 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2)
 		
 	// mutaciones 
 	int mutation = rand() % 100 + 1; // numero aleatorio entre  [1,100]
-	if(mutation <= mutation_rate) // chequeamos si el numero aleatorio <= radio de mutacion 
+	if(mutation <= prob_mutacion) // chequeamos si el numero aleatorio <= radio de mutacion 
 	{
 		// mutacion: cambio de dos genes 
 		
@@ -403,23 +404,23 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2)
 		child2[index_gene2] = aux;
 	}
 	
-	int total_cost_child1 = isValidSolution(child1);
-	int total_cost_child2 = isValidSolution(child2);
+	int dist_total_child1 = Solval(child1);
+	int dist_total_child2 = Solval(child2);
 	
     // comprueba si es una solución válida y no existe en la población
-	if(total_cost_child1 != -1 && !existsChromosome(child1))
+	if(dist_total_child1 != -1 && !Cromosoma(child1))
 	{
 		// agrega un niño en la población
-		insertBinarySearch(child1, total_cost_child1); // binary search para insertar
-		real_size_population++; // incrementar real size population
+		Binary(child1, dist_total_child1); // binary search para insertar
+		poblacion_actual++; // incrementar real size population
 	}
 	
 	// chequeamos otra vez.
-	if(total_cost_child2 != -1 && !existsChromosome(child2))
+	if(dist_total_child2 != -1 && !Cromosoma(child2))
 	{
 		// agregamos un child en la poblacion
-		insertBinarySearch(child2, total_cost_child2); // binary search para incertar
-		real_size_population++; // incrementar el real size population 
+		Binary(child2, dist_total_child2); // binary search para incertar
+		poblacion_actual++; // incrementar el real size population 
 	}
 }
 
@@ -428,28 +429,28 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2)
 void Genetic::run()
 {  
   
-	initialPopulation(); // crea la poblacion inicial
-	if(show_population == true)
-		showPopulation(); // muestra la poblacion
-	if(real_size_population == 0)
+	poblacioninicial(); // crea la poblacion inicial
+	if(show == true)
+		showP(); // muestra la poblacion
+	if(poblacion_actual == 0)
 		return;
   string nombreArchivo = "datos.txt";
   ofstream archivo;
 // Abrimos el archivo
   archivo.open(nombreArchivo.c_str(), fstream::out);
-	for(int i = 0; i < generations; i++)
+	for(int i = 0; i < generaciones; i++)
 	{
-		int  old_size_population = real_size_population;
+		int  old_size_population = poblacion_actual;
 		
 		/* selecciona a dos padres (si existen) que participarán
 del proceso de reproducción */
-    for (int j=1; j<children;j++){
-		if(real_size_population >= 2)
+    for (int j=1; j<numcross;j++){
+		if(poblacion_actual >= 2)
 		{	
-			if(real_size_population == 2)
+			if(poblacion_actual == 2)
 			{
 				// aplicando crossover en los padres
-				crossOver(population[0].first, population[1].first);
+				crossOver(poblacion[0].first, poblacion[1].first);
 			}
 			else
 			{
@@ -460,79 +461,78 @@ del proceso de reproducción */
 				do
 				{
 					// seleccionar dos padres al azar
-					parent1 = rand() % real_size_population;
-					parent2 = rand() % real_size_population;
+					parent1 = rand() % poblacion_actual;
+					parent2 = rand() % poblacion_actual;
 				}while(parent1 == parent2);
 				
 				// Aplicar cruce en los dos padres(m
-				crossOver(population[parent1].first, population[parent2].first);
+				crossOver(poblacion[parent1].first, poblacion[parent2].first);
 			}}
       	else // poblacion contiene solamente 1 padre 
 		{
 			// aplicar crossover con los dos padres 
-			crossOver(population[0].first, population[0].first);
+			crossOver(poblacion[0].first, poblacion[0].first);
 			
-			if(real_size_population > size_population)
+			if(poblacion_actual > tam_poblacion)
 			{
-				population.pop_back();// elimina al peor padre de la población(
-				real_size_population--; // disminuya la real_size_population
+				poblacion.pop_back();// elimina al peor padre de la población(
+				poblacion_actual--; // disminuya la poblacion actual
 			}
 			
 			
 // obtiene la diferencia para comprobar si la población creció 
-			int diff_population = real_size_population - size_population;
 			
-      while(diff_population>0){
-			if(diff_population == 2)
-			{
-				if(real_size_population > size_population)
+		} 
+		}
+    int dif_poblacion = poblacion_actual - tam_poblacion;
+			
+      while(dif_poblacion>0){
+				if(poblacion_actual > tam_poblacion)
 				{
 					
-					population.pop_back();
-					population.pop_back();// elimina a los dos peores padres de la población);
-          diff_population=diff_population-2;
+					poblacion.pop_back(); //Intente con pop y no me funciono asi que use popback
+					poblacion.pop_back();// elimina a los dos peores padres de la población); 
+          dif_poblacion=dif_poblacion-2;
 					
 					
 // disminuye la población de tamaño real en 2 unidades
-					real_size_population -= 2;
+					poblacion_actual -= 2;
 				}
-			}
-			else if(diff_population == 1)
+			else if(dif_poblacion == 1)
 			{
-				if(real_size_population > size_population)
+				if(poblacion_actual > tam_poblacion)
 				{
-					population.pop_back(); // elimina al peor padre de la población(
-					real_size_population--; //disminuye el real_size poblacion
+					poblacion.pop_back(); // elimina al peor padre de la población(
+					poblacion_actual--; //disminuye el real_size poblacion
 				}
-        diff_population=diff_population-1;
+        dif_poblacion=dif_poblacion-1;
 			}
     
       }
-		} 
-		}
-    if (i==generations-1){
-       archivo << population[0].second;}
+    if (i==generaciones-1){
+       archivo << poblacion[0].second;}
     else{
-      archivo << population[0].second<<endl;
+      archivo << poblacion[0].second<<endl;
     }
-    cout << "\nIteración "<< i <<" Costo: " << population[0].second; 
+    if (shows){
+    cout << "\nIteración "<< i <<" Costo: " << poblacion[0].second;} 
 	}
 	archivo.close();
-	if(show_population == true)
-		showPopulation(); // muestra la poblacion
+	if(show == true)
+		showP(); // muestra la poblacion
 	
 	cout << "\nMejor solucion: ";
-	const vector<int>& vec = population[0].first;
+	const vector<int>& vec = poblacion[0].first;
 	for(int i = 0; i < graph->V; i++)
 		cout << vec[i] << " ";
 	cout << graph->vertice_inicial;
-	cout << "\n Costo: " << population[0].second;
+	cout << "\n Costo: " << poblacion[0].second;
 }
 
 
-int Genetic::getCostBestSolution()
+int Genetic::BestSol()
 {
-	if(real_size_population > 0)
-		return population[0].second;
+	if(poblacion_actual > 0)
+		return poblacion[0].second;
 	return -1;
 }
