@@ -1,9 +1,9 @@
-graf.c ->codigo para graficar lo obtenido con C++ 
- 
+
 codigo principal-> codigo usado para el proyecto
                     
                leer los comentarios si se quiere cambiar 
                algunos parametros
+               el codigo guarda los costos por iteración en un txt llamado datos.txt para despues graficarlos con ROOT
 
 algoritmo genetico explicado-> bonus de un TSP euclidiano resuelto en python
 
