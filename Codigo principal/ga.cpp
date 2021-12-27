@@ -18,7 +18,7 @@ Graph::Graph(int V, int vertice_inicial, bool randomg) // constructor
 	
 	this->V = V; // numero de vertices
 	this->vertice_inicial = vertice_inicial; // vertice inicial
-	this->uniones = 0; // total de  edges (o links)  0
+	this->uniones = 0; // total de  uniones  0
 	
 	if(randomg)
 		generaG();
@@ -220,7 +220,7 @@ void Genetic::poblacioninicial() // generamos la poblacion inicial
 		if(total_cost != -1 && !Cromosoma(parent))
 		{
 		poblacion.push_back(make_pair(parent, total_cost)); // agrega en la solucion iniciaul
-			poblacion_actual++; // incrementamos el real size population
+			poblacion_actual++; // incrementamos la poblacion actual
 		}
 		if(poblacion_actual == tam_poblacion) // chequamos el tamaño de la poblacion, si tenemos los necesarios breakeamos
 			break;
@@ -412,7 +412,7 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2)
 	{
 		// agrega un niño en la población
 		Binary(child1, dist_total_child1); // binary search para insertar
-		poblacion_actual++; // incrementar real size population
+		poblacion_actual++; // incrementar la poblacion actual
 	}
 	
 	// chequeamos otra vez.
@@ -420,7 +420,7 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2)
 	{
 		// agregamos un child en la poblacion
 		Binary(child2, dist_total_child2); // binary search para incertar
-		poblacion_actual++; // incrementar el real size population 
+		poblacion_actual++; // incrementar la poblacion actual
 	}
 }
 
@@ -503,7 +503,7 @@ del proceso de reproducción */
 				if(poblacion_actual > tam_poblacion)
 				{
 					poblacion.pop_back(); // elimina al peor padre de la población(
-					poblacion_actual--; //disminuye el real_size poblacion
+					poblacion_actual--; //disminuye la poblacion actual
 				}
         dif_poblacion=dif_poblacion-1;
 			}
